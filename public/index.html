@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clash Verge 独立 IP 纯净度与风控中心</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="header">
+      <div class="logo-area">
+        <div class="shield-icon">🛡️</div>
+        <div>
+          <h1 class="app-title">Clash Verge <span class="accent-text">独立 IP 风控中心</span></h1>
+          <p class="app-subtitle">⚡ 本地纯净度与风控评估引擎 · 100% 独立后台运行 · 每次请求生成规范表格</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="latencyBadge" class="latency-badge">⚡ 引擎耗时: 12ms</span>
+        <label class="auto-toggle">
+          <input type="checkbox" id="autoRefreshCheckbox" checked>
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">自动监测</span>
+        </label>
+        <button id="notifyBtn" class="btn btn-secondary" title="发送系统通知">
+          <span>🔔</span> 发送通知
+        </button>
+        <button id="refreshBtn" class="btn btn-primary" title="重新检测">
+          <span class="refresh-icon">🔄</span> 重新检测
+        </button>
+      </div>
+    </header>
+
+    <!-- Error/Warning Banner if any -->
+    <div id="statusAlert" class="alert hidden"></div>
+
+    <!-- Main Grid Layout -->
+    <main class="dashboard-grid">
+      <!-- Left Column: Primary Risk & Egress Card -->
+      <section class="card hero-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-icon">🌐</span>
+            <h2>当前代理出口 IP</h2>
+          </div>
+          <span id="proxyStatusBadge" class="status-pill status-active">
+            <span class="pulse-dot"></span> 代理连接正常 (7897)
+          </span>
+        </div>
+
+        <div class="ip-display-row">
+          <div class="ip-large" id="ipAddress">154.12.39.12</div>
+          <button id="copyIpBtn" class="btn-icon" title="复制 IP 地址">📋</button>
+        </div>
+
+        <div class="geo-info-row">
+          <span class="geo-flag" id="geoFlag">🇺🇸</span>
+          <span class="geo-text" id="geoLoc">美国 加利福尼亚州 洛杉矶</span>
+        </div>
+
+        <div class="meta-tags-row">
+          <span class="tag tag-asn" id="asnTag">AS979</span>
+          <span class="tag tag-org" id="orgTag">NetLab Global</span>
+          <span class="tag tag-ping0" id="ping0Tag" style="background:rgba(234,179,8,0.15); color:#eab308; border-color:rgba(234,179,8,0.3);">Ping0: 同步中</span>
+          <span class="tag tag-users" id="usersTag" style="background:rgba(99,102,241,0.15); color:#818cf8; border-color:rgba(99,102,241,0.3);">👥 共享: 评估中</span>
+          <span class="tag tag-check-time" id="checkTimeTag">检测时间: 刚刚</span>
+        </div>
+
+        <!-- Risk Control Section -->
+        <div class="risk-section">
+          <div class="risk-header">
+            <div class="risk-title">
+              <span>综合 IP 风控值评级</span>
+              <span class="engine-badge">本地算法</span>
+            </div>
+            <div class="risk-score-display">
+              <span id="riskValueNumber" class="score-num">22%</span>
+              <span id="riskValueLabel" class="score-badge badge-green">纯净</span>
+            </div>
+          </div>
+
+          <!-- 6-segment Risk Bar -->
+          <div class="ping0-riskbar">
+            <div class="risk-seg" data-range="0-15" title="0-15 极度纯净" style="background:#10b981;">
+              <span class="seg-label">极度纯净</span>
+            </div>
+            <div class="risk-seg" data-range="15-25" title="15-25 纯净" style="background:#22c55e;">
+              <span class="seg-label">纯净</span>
+            </div>
+            <div class="risk-seg" data-range="25-40" title="25-40 中性" style="background:#84cc16;">
+              <span class="seg-label">中性</span>
+            </div>
+            <div class="risk-seg" data-range="40-50" title="40-50 轻微风险" style="background:#eab308;">
+              <span class="seg-label">轻微风险</span>
+            </div>
+            <div class="risk-seg" data-range="50-70" title="50-70 稍高风险" style="background:#f97316;">
+              <span class="seg-label">稍高风险</span>
+            </div>
+            <div class="risk-seg" data-range="70-100" title="70-100 极度风险" style="background:#ef4444;">
+              <span class="seg-label">极度风险</span>
+            </div>
+          </div>
+
+          <p class="risk-description" id="riskDescription">
+            值越小越安全，50 以内安全，70 以上极高风险。当前 IP 处于纯净健康区间。
+          </p>
+
+          <!-- Score Breakdown List -->
+          <div class="breakdown-box" id="breakdownBox">
+            <div class="breakdown-header">
+              <span>分值评定构成：</span>
+            </div>
+            <div class="breakdown-list" id="breakdownList">
+              <span class="breakdown-item">+5% 商业 IDC 机房出口</span>
+              <span class="breakdown-item">0% 原生单播 IP</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Deep Intelligence & Scenario Ratings -->
+      <section class="card intelligence-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-icon">📊</span>
+            <h2>多维网络属性与纯净度分析</h2>
+          </div>
+          <span class="status-pill" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan); border-color:rgba(6,182,212,0.3);">
+            独立离线特征库
+          </span>
+        </div>
+
+        <div class="attributes-grid">
+          <!-- Item 1: Native IP -->
+          <div class="attr-box">
+            <div class="attr-label">原生 IP 属性</div>
+            <div class="attr-value" id="nativeStatus">
+              <span class="indicator-icon">✅</span>
+              <span>原生 IP (Native)</span>
+            </div>
+            <div class="attr-hint">注册地与实测物理机房一致，单播路由</div>
+          </div>
+
+          <!-- Item 2: IP Type -->
+          <div class="attr-box">
+            <div class="attr-label">IP 部署类型</div>
+            <div class="attr-value" id="ipTypeStatus">
+              <span class="indicator-icon">🏢</span>
+              <span>IDC 机房 IP</span>
+            </div>
+            <div class="attr-hint">商业服务器 / 数据中心出口</div>
+          </div>
+
+          <!-- Item 3: Local Feature Model -->
+          <div class="attr-box attr-box-full">
+            <div class="attr-label">本地特征模型评估 (Local Classifier)</div>
+            <div class="attr-value ai-value" id="aiCheckStatus">
+              <span class="indicator-icon">🤖</span>
+              <span id="aiCheckText">商业数据中心机房出口 (IDC)，无恶劣黑名单标记，运行良好</span>
+            </div>
+          </div>
+
+          <!-- Item 4: Ping0 Official Type -->
+          <div class="attr-box">
+            <div class="attr-label">Ping0 权威类型</div>
+            <div class="attr-value" id="ping0TypeBox">
+              <span class="indicator-icon">🎯</span>
+              <span id="ping0TypeText">同步中...</span>
+            </div>
+            <div class="attr-hint">原生接口权威类型核验</div>
+          </div>
+
+          <!-- Item 5: Estimated Shared Users -->
+          <div class="attr-box">
+            <div class="attr-label">预估共享人数</div>
+            <div class="attr-value" id="sharedUsersBox">
+              <span class="indicator-icon">👥</span>
+              <span id="sharedUsersText">评估中...</span>
+            </div>
+            <div class="attr-hint">基于网络拓扑与代理属性估算</div>
+          </div>
+
+          <!-- Item 6: Privacy & Anonymity -->
+          <div class="attr-box">
+            <div class="attr-label">公共代理 / 威胁情报</div>
+            <div class="attr-value" id="privacyStatus">
+              <span class="indicator-icon">🛡️</span>
+              <span>未标记公共恶意出口</span>
+            </div>
+            <div class="attr-hint">DNSBL 黑名单与情报库核验</div>
+          </div>
+
+          <!-- Item 7: BGP & Subnet Stability -->
+          <div class="attr-box">
+            <div class="attr-label">BGP 与广播稳定性</div>
+            <div class="attr-value" id="bgpStatus">
+              <span class="indicator-icon">📡</span>
+              <span>路由广播稳定</span>
+            </div>
+            <div class="attr-hint">ASN 历史无异常迁移漂移记录</div>
+          </div>
+        </div>
+
+        <!-- Scenario Suitability Ratings -->
+        <div class="scenarios-section">
+          <h3 class="section-subtitle">🎯 常见业务场景适用性推荐</h3>
+          <div class="scenarios-grid">
+            <div class="scenario-item">
+              <span class="sc-name">TikTok / 海外社媒</span>
+              <span class="sc-stars" id="starTiktok">⭐⭐⭐⭐⭐</span>
+            </div>
+            <div class="scenario-item">
+              <span class="sc-name">ChatGPT / OpenAI</span>
+              <span class="sc-stars" id="starChatgpt">⭐⭐⭐⭐⭐</span>
+            </div>
+            <div class="scenario-item">
+              <span class="sc-name">跨境电商 / PayPal</span>
+              <span class="sc-stars" id="starEcommerce">⭐⭐⭐⭐</span>
+            </div>
+            <div class="scenario-item">
+              <span class="sc-name">流媒体解锁 (Netflix)</span>
+              <span class="sc-stars" id="starStreaming">⭐⭐⭐⭐⭐</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- NEW SECTION: Detailed IP Inspection Specification Table (每次请求输出的好看简洁表格) -->
+    <section class="card spec-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">📋</span>
+          <h2>节点 IP 纯净度与风控报告</h2>
+        </div>
+        <span class="table-tag" id="tableGenTime">生成时间: 刚刚</span>
+      </div>
+
+      <div class="table-container">
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th style="width: 18%;">评测指标</th>
+              <th style="width: 38%;">当前检测结果</th>
+              <th style="width: 16%;">状态评级</th>
+              <th style="width: 28%;">技术判定说明</th>
+            </tr>
+          </thead>
+          <tbody id="specTableBody">
+            <tr>
+              <td colspan="4" class="empty-cell">正在生成检测规格表...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION: Website Latency and Speed Test Table -->
+    <section class="card spec-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">⚡</span>
+          <h2>常用服务连通性与延迟测速</h2>
+        </div>
+        <span class="table-tag" id="speedGenTime">并发测速</span>
+      </div>
+
+      <div class="table-container">
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">目标服务</th>
+              <th style="width: 25%;">往返延迟</th>
+              <th style="width: 25%;">HTTP 状态</th>
+              <th style="width: 25%;">连通评级</th>
+            </tr>
+          </thead>
+          <tbody id="speedTableBody">
+            <tr>
+              <td colspan="4" class="empty-cell">正在测速中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Bottom History Section -->
+    <section class="card history-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">🕒</span>
+          <h2>节点切换与检测历史记录</h2>
+        </div>
+        <button id="clearHistoryBtn" class="btn-text">清空记录</button>
+      </div>
+
+      <div class="table-container">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>出口 IP</th>
+              <th>归属地</th>
+              <th>IP 类型</th>
+              <th>风控分</th>
+              <th>风险等级</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="6" class="empty-cell">正在拉取检测记录...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Clash Verge 独立纯净度与风控中枢 · 本地独立算法 · 规范报告表格生成</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

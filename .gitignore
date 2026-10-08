@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Local cache & data
+.ping0_cache.json
+*.log
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.bak
+*.tmp
